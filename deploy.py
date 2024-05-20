@@ -95,14 +95,21 @@ def clone_repo(git_url, destination_path, branch, github_token):
         logger.error(f"Error: The branch '{branch}' does not exist in the remote repository.")
         raise ValueError(f"The branch '{branch}' does not exist in the remote repository.")
 
-def deploy_repo(git_url, destination_path, branch, github_token, backup_base_path):
+def deploy_repo(git_url, base_destination_path, branch, github_token, backup_base_path):
     verify_git_installation()
 
-    backup_repo_path = os.path.join(backup_base_path, os.path.basename(destination_path))
+    repo_name = os.path.basename(git_url).replace('.git', '')
+    destination_path = os.path.join(base_destination_path, repo_name)
+    backup_repo_path = os.path.join(backup_base_path, repo_name)
     
-    if not os.path.isdir(destination_path):
-        logger.error("The destination path is not a valid directory.")
-        print("The destination path is not a valid directory.")
+    if not os.path.isdir(base_destination_path):
+        logger.error("The base destination path is not a valid directory.")
+        print("The base destination path is not a valid directory.")
+        return
+
+    if not os.path.isdir(backup_base_path):
+        logger.error("The base backup path is not a valid directory.")
+        print("The base backup path is not a valid directory.")
         return
 
     rollback_needed = False
@@ -150,20 +157,23 @@ def main():
     args = parser.parse_args()
 
     git_url = input("Enter the GitHub repository URL: ").strip()
-    destination_path = input("Enter the destination path for the repository: ").strip()
+    base_destination_path = input("Enter the base destination path for the repository: ").strip()
     branch = input("Enter the branch name to deploy (default is 'master'): ").strip() or "master"
     github_token = input("Enter your GitHub Personal Access Token: ").strip()
-    backup_base_path = input("Enter the path for the backup: ").strip()
+    backup_base_path = input("Enter the base path for the backup: ").strip()
+
+    repo_name = os.path.basename(git_url).replace('.git', '')
+    backup_repo_path = os.path.join(backup_base_path, repo_name)
+    destination_path = os.path.join(base_destination_path, repo_name)
 
     if args.rollback:
-        backup_repo_path = os.path.join(backup_base_path, os.path.basename(destination_path))
         if os.path.exists(backup_repo_path):
             restore_backup(backup_repo_path, destination_path)
         else:
             print("Backup path does not exist. Rollback failed.")
             logger.error("Backup path does not exist. Rollback failed.")
     else:
-        deploy_repo(git_url, destination_path, branch, github_token, backup_base_path)
+        deploy_repo(git_url, base_destination_path, branch, github_token, backup_base_path)
 
 if __name__ == "__main__":
     main()
