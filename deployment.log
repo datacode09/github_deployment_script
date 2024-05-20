@@ -11,3 +11,39 @@
 2024-05-20 18:23:48,630:ERROR:Deployment failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Initiating rollback.
 2024-05-20 18:23:48,630:ERROR:Error restoring backup: unexpected error occurred - [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'
 2024-05-20 18:23:48,630:INFO:Rollback completed. Backup reinstated.
+2024-05-20 18:55:35,507:INFO:Git is installed.
+2024-05-20 18:55:35,522:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 1/3...
+2024-05-20 18:55:40,536:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 2/3...
+2024-05-20 18:55:45,545:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 3/3...
+2024-05-20 18:55:50,551:ERROR:Error creating backup after multiple attempts.
+2024-05-20 18:55:50,551:ERROR:Backup failed. Deployment aborted.
+2024-05-20 18:56:51,556:INFO:Git is installed.
+2024-05-20 18:56:51,557:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 1/3...
+2024-05-20 18:56:56,570:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 2/3...
+2024-05-20 18:57:01,579:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 3/3...
+2024-05-20 18:57:06,580:ERROR:Error creating backup after multiple attempts.
+2024-05-20 18:57:06,580:ERROR:Backup failed. Deployment aborted.
+2024-05-20 19:01:11,493:INFO:Git is installed.
+2024-05-20 19:01:11,493:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 1/3...
+2024-05-20 19:01:16,493:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 2/3...
+2024-05-20 19:01:21,502:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\github_bkp_test\\linux_old_files_cleaner\\.git\\objects\\pack\\pack-be6b01d8edeffcf9bc56ed77857f5e9eb7019da8.idx'. Retrying 3/3...
+2024-05-20 19:01:26,510:ERROR:Error creating backup after multiple attempts.
+2024-05-20 19:01:26,510:ERROR:Backup failed. Deployment aborted.
+2024-05-20 19:03:32,844:INFO:Git is installed.
+2024-05-20 19:03:33,541:INFO:Repository cloned successfully into C:\Users\abulh\Downloads\linux_old_files_cleaner_temp on branch 'main'.
+2024-05-20 19:03:33,541:ERROR:Unexpected error occurred while cloning repository: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner_temp\\.git\\objects\\pack\\pack-aa569ff9d85a9f2c2d7801d20768af6332de4acd.idx'
+2024-05-20 19:03:33,541:ERROR:Deployment failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner_temp\\.git\\objects\\pack\\pack-aa569ff9d85a9f2c2d7801d20768af6332de4acd.idx'
+2024-05-20 19:11:25,220:INFO:Git is installed.
+2024-05-20 19:11:25,220:INFO:Backup created at: C:\Users\abulh\Downloads\github_bkp_test\linux_old_files_cleaner
+2024-05-20 19:11:25,932:INFO:Repository cloned successfully into C:\Users\abulh\Downloads\linux_old_files_cleaner\temp_clone on branch 'main'.
+2024-05-20 19:11:25,964:ERROR:Unexpected error occurred while cloning repository: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'
+2024-05-20 19:11:25,964:ERROR:Deployment failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'. Initiating rollback.
+2024-05-20 19:11:25,964:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'. Retrying 1/3...
+2024-05-20 19:11:30,966:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'. Retrying 2/3...
+2024-05-20 19:11:35,966:ERROR:Operation failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'. Retrying 3/3...
+2024-05-20 19:11:40,973:ERROR:Error restoring backup after multiple attempts.
+2024-05-20 19:11:40,973:INFO:Rollback completed. Backup reinstated.
+2024-05-20 19:13:14,120:INFO:Git is installed.
+2024-05-20 19:13:14,782:INFO:Repository cloned successfully into C:\Users\abulh\Downloads\linux_old_files_cleaner\temp_clone on branch 'main'.
+2024-05-20 19:13:14,798:ERROR:Unexpected error occurred while cloning repository: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'
+2024-05-20 19:13:14,798:ERROR:Deployment failed: [WinError 5] Access is denied: 'C:\\Users\\abulh\\Downloads\\linux_old_files_cleaner\\temp_clone\\.git\\objects\\pack\\pack-6c10605181df01c5825af6b42ff171a6635cafd1.idx'
