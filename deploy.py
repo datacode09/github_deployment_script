@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 import subprocess
-from datetime import datetime
 import argparse
 
 # Setup Logging
@@ -22,15 +21,15 @@ def verify_git_installation():
         logger.error("Git is not installed. Please install Git to proceed.")
         raise EnvironmentError("Git is not installed. Please install Git to proceed.") from e
 
-def backup_artifacts(destination_path, backup_path):
+def backup_artifacts(destination_path, backup_repo_path):
     """Backs up the deployment artifacts."""
     try:
         if os.path.exists(destination_path):
-            if os.path.exists(backup_path):
-                shutil.rmtree(backup_path)  # Remove the existing backup directory
-            shutil.copytree(destination_path, backup_path)
-            logger.info(f"Backup created at: {backup_path}")
-            return backup_path
+            if os.path.exists(backup_repo_path):
+                shutil.rmtree(backup_repo_path)  # Remove the existing backup directory
+            shutil.copytree(destination_path, backup_repo_path)
+            logger.info(f"Backup created at: {backup_repo_path}")
+            return backup_repo_path
     except shutil.Error as e:
         logger.error(f"Error creating backup: shutil error occurred - {e}")
         return None
@@ -38,14 +37,14 @@ def backup_artifacts(destination_path, backup_path):
         logger.error(f"Error creating backup: unexpected error occurred - {e}")
         return None
 
-def restore_backup(backup_path, destination_path):
+def restore_backup(backup_repo_path, destination_path):
     """Restores the backup in case of deployment failure."""
     try:
         if os.path.exists(destination_path):
             shutil.rmtree(destination_path)
-        shutil.copytree(backup_path, destination_path)
-        logger.info(f"Backup restored from {backup_path} to {destination_path}")
-        print(f"Backup restored from {backup_path} to {destination_path}")
+        shutil.copytree(backup_repo_path, destination_path)
+        logger.info(f"Backup restored from {backup_repo_path} to {destination_path}")
+        print(f"Backup restored from {backup_repo_path} to {destination_path}")
     except shutil.Error as e:
         logger.error(f"Error restoring backup: shutil error occurred - {e}")
         print(f"Error restoring backup: shutil error occurred - {e}")
@@ -96,9 +95,11 @@ def clone_repo(git_url, destination_path, branch, github_token):
         logger.error(f"Error: The branch '{branch}' does not exist in the remote repository.")
         raise ValueError(f"The branch '{branch}' does not exist in the remote repository.")
 
-def deploy_repo(git_url, destination_path, branch, github_token, backup_path):
+def deploy_repo(git_url, destination_path, branch, github_token, backup_base_path):
     verify_git_installation()
 
+    backup_repo_path = os.path.join(backup_base_path, os.path.basename(destination_path))
+    
     if not os.path.isdir(destination_path):
         logger.error("The destination path is not a valid directory.")
         print("The destination path is not a valid directory.")
@@ -108,16 +109,16 @@ def deploy_repo(git_url, destination_path, branch, github_token, backup_path):
 
     if os.path.exists(destination_path):
         # Backup current deployment before making any changes
-        backup_path = backup_artifacts(destination_path, backup_path)
-        if backup_path:
+        backup_repo_path = backup_artifacts(destination_path, backup_repo_path)
+        if backup_repo_path:
             try:
                 # Clean the destination path
                 shutil.rmtree(destination_path)
                 os.makedirs(destination_path)
                 # Clone the repository
                 clone_repo(git_url, destination_path, branch, github_token)
-                logger.info(f"Deployment updated successfully for repository {git_url} on branch {branch}. Backup created at {backup_path}.")
-                print(f"Deployment updated successfully for repository {git_url} on branch {branch}. Backup created at {backup_path}.")
+                logger.info(f"Deployment updated successfully for repository {git_url} on branch {branch}. Backup created at {backup_repo_path}.")
+                print(f"Deployment updated successfully for repository {git_url} on branch {branch}. Backup created at {backup_repo_path}.")
             except Exception as e:
                 logger.error(f"Deployment failed: {e}. Initiating rollback.")
                 print("Deployment failed. Initiating rollback.")
@@ -138,8 +139,8 @@ def deploy_repo(git_url, destination_path, branch, github_token, backup_path):
             print("Deployment failed.")
             rollback_needed = True
 
-    if rollback_needed and os.path.exists(backup_path):
-        restore_backup(backup_path, destination_path)
+    if rollback_needed and os.path.exists(backup_repo_path):
+        restore_backup(backup_repo_path, destination_path)
         print("Rollback completed. Backup reinstated.")
         logger.info("Rollback completed. Backup reinstated.")
 
@@ -152,16 +153,17 @@ def main():
     destination_path = input("Enter the destination path for the repository: ").strip()
     branch = input("Enter the branch name to deploy (default is 'master'): ").strip() or "master"
     github_token = input("Enter your GitHub Personal Access Token: ").strip()
-    backup_path = input("Enter the path for the backup: ").strip()
+    backup_base_path = input("Enter the path for the backup: ").strip()
 
     if args.rollback:
-        if os.path.exists(backup_path):
-            restore_backup(backup_path, destination_path)
+        backup_repo_path = os.path.join(backup_base_path, os.path.basename(destination_path))
+        if os.path.exists(backup_repo_path):
+            restore_backup(backup_repo_path, destination_path)
         else:
             print("Backup path does not exist. Rollback failed.")
             logger.error("Backup path does not exist. Rollback failed.")
     else:
-        deploy_repo(git_url, destination_path, branch, github_token, backup_path)
+        deploy_repo(git_url, destination_path, branch, github_token, backup_base_path)
 
 if __name__ == "__main__":
     main()
