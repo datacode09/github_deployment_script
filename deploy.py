@@ -3,6 +3,8 @@ import os
 import shutil
 import subprocess
 import argparse
+import time
+import getpass
 
 # Setup Logging
 logger = logging.getLogger('DeploymentLogger')
@@ -21,36 +23,45 @@ def verify_git_installation():
         logger.error("Git is not installed. Please install Git to proceed.")
         raise EnvironmentError("Git is not installed. Please install Git to proceed.") from e
 
+def retry_operation(operation, max_retries=3, delay=5):
+    """Retries a file operation in case of failure."""
+    for attempt in range(max_retries):
+        try:
+            operation()
+            return True
+        except Exception as e:
+            logger.error(f"Operation failed: {e}. Retrying {attempt + 1}/{max_retries}...")
+            time.sleep(delay)
+    return False
+
 def backup_artifacts(destination_path, backup_repo_path):
-    """Backs up the deployment artifacts."""
-    try:
+    """Backs up the deployment artifacts without the .git directory."""
+    def operation():
         if os.path.exists(destination_path):
             if os.path.exists(backup_repo_path):
                 shutil.rmtree(backup_repo_path)  # Remove the existing backup directory
-            shutil.copytree(destination_path, backup_repo_path)
+            shutil.copytree(destination_path, backup_repo_path, ignore=shutil.ignore_patterns('.git'))
             logger.info(f"Backup created at: {backup_repo_path}")
             return backup_repo_path
-    except shutil.Error as e:
-        logger.error(f"Error creating backup: shutil error occurred - {e}")
-        return None
-    except Exception as e:
-        logger.error(f"Error creating backup: unexpected error occurred - {e}")
+
+    if retry_operation(operation):
+        return backup_repo_path
+    else:
+        logger.error("Error creating backup after multiple attempts.")
         return None
 
 def restore_backup(backup_repo_path, destination_path):
     """Restores the backup in case of deployment failure."""
-    try:
+    def operation():
         if os.path.exists(destination_path):
             shutil.rmtree(destination_path)
-        shutil.copytree(backup_repo_path, destination_path)
+        shutil.copytree(backup_repo_path, destination_path, dirs_exist_ok=True)
         logger.info(f"Backup restored from {backup_repo_path} to {destination_path}")
         print(f"Backup restored from {backup_repo_path} to {destination_path}")
-    except shutil.Error as e:
-        logger.error(f"Error restoring backup: shutil error occurred - {e}")
-        print(f"Error restoring backup: shutil error occurred - {e}")
-    except Exception as e:
-        logger.error(f"Error restoring backup: unexpected error occurred - {e}")
-        print(f"Error restoring backup: unexpected error occurred - {e}")
+
+    if not retry_operation(operation):
+        logger.error("Error restoring backup after multiple attempts.")
+        print("Error restoring backup after multiple attempts.")
 
 def branch_exists(git_url, branch, github_token):
     """Checks if the specified branch exists in the remote repository."""
@@ -75,16 +86,18 @@ def get_current_branch(destination_path):
         logger.error(f"Unexpected error occurred while retrieving the current branch name: {e}")
         return None
 
-def clone_repo(git_url, destination_path, branch, github_token):
-    """Clones the given GitHub repository into the specified destination path and checks out the specified branch."""
+def clone_repo(git_url, temp_clone_path, branch, github_token):
+    """Clones the given GitHub repository into a temporary location and removes the .git directory."""
     auth_git_url = git_url.replace("https://", f"https://{github_token}@")
     if branch_exists(git_url, branch, github_token):
-        if not os.path.exists(destination_path):
-            os.makedirs(destination_path)
-        command = ["git", "clone", "-b", branch, auth_git_url, destination_path]
+        if not os.path.exists(temp_clone_path):
+            os.makedirs(temp_clone_path)
+        command = ["git", "clone", "-b", branch, "--single-branch", "--depth", "1", auth_git_url, temp_clone_path]
         try:
             subprocess.run(command, check=True)
-            logger.info(f"Repository cloned successfully into {destination_path} on branch '{branch}'.")
+            logger.info(f"Repository cloned successfully into {temp_clone_path} on branch '{branch}'.")
+            # Remove the .git directory
+            shutil.rmtree(os.path.join(temp_clone_path, '.git'))
         except subprocess.CalledProcessError as e:
             logger.error(f"Error cloning repository: subprocess error occurred - {e}")
             raise
@@ -101,6 +114,7 @@ def deploy_repo(git_url, base_destination_path, branch, github_token, backup_bas
     repo_name = os.path.basename(git_url).replace('.git', '')
     destination_path = os.path.join(base_destination_path, repo_name)
     backup_repo_path = os.path.join(backup_base_path, repo_name)
+    temp_clone_path = os.path.join(base_destination_path, f"{repo_name}_temp")
     
     if not os.path.isdir(base_destination_path):
         logger.error("The base destination path is not a valid directory.")
@@ -120,10 +134,17 @@ def deploy_repo(git_url, base_destination_path, branch, github_token, backup_bas
         if backup_repo_path:
             try:
                 # Clean the destination path
-                shutil.rmtree(destination_path)
+                if not retry_operation(lambda: shutil.rmtree(destination_path)):
+                    logger.error("Failed to clean the destination path after multiple attempts. Deployment aborted.")
+                    print("Failed to clean the destination path. Deployment aborted.")
+                    return
+
                 os.makedirs(destination_path)
-                # Clone the repository
-                clone_repo(git_url, destination_path, branch, github_token)
+                # Clone the repository to a temporary location and remove the .git directory
+                clone_repo(git_url, temp_clone_path, branch, github_token)
+                # Copy the contents from the temporary location to the destination path
+                shutil.copytree(temp_clone_path, destination_path, dirs_exist_ok=True)
+                shutil.rmtree(temp_clone_path)
                 logger.info(f"Deployment updated successfully for repository {git_url} on branch {branch}. Backup created at {backup_repo_path}.")
                 print(f"Deployment updated successfully for repository {git_url} on branch {branch}. Backup created at {backup_repo_path}.")
             except Exception as e:
@@ -135,10 +156,13 @@ def deploy_repo(git_url, base_destination_path, branch, github_token, backup_bas
             print("Backup failed. Deployment aborted.")
             return
     else:
-        if not os.path.exists(destination_path):
-            os.makedirs(destination_path)
         try:
-            clone_repo(git_url, destination_path, branch, github_token)
+            os.makedirs(destination_path)
+            # Clone the repository to a temporary location and remove the .git directory
+            clone_repo(git_url, temp_clone_path, branch, github_token)
+            # Copy the contents from the temporary location to the destination path
+            shutil.copytree(temp_clone_path, destination_path, dirs_exist_ok=True)
+            shutil.rmtree(temp_clone_path)
             logger.info(f"Repository {git_url} cloned successfully into {destination_path} on branch '{branch}'.")
             print(f"Repository {git_url} cloned successfully into {destination_path} on branch '{branch}'")
         except Exception as e:
@@ -159,7 +183,7 @@ def main():
     git_url = input("Enter the GitHub repository URL: ").strip()
     base_destination_path = input("Enter the base destination path for the repository: ").strip()
     branch = input("Enter the branch name to deploy (default is 'master'): ").strip() or "master"
-    github_token = input("Enter your GitHub Personal Access Token: ").strip()
+    github_token = getpass.getpass("Enter your GitHub Personal Access Token: ").strip()
     backup_base_path = input("Enter the base path for the backup: ").strip()
 
     repo_name = os.path.basename(git_url).replace('.git', '')
