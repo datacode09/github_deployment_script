@@ -81,6 +81,8 @@ def deploy_repo():
         else:
             logging.error("Backup failed. Deployment aborted.")
     else:
+        if not os.path.exists(destination_path):
+            os.makedirs(destination_path)
         clone_repo(git_url, destination_path, branch, github_token)
         logging.info(f"Repository {git_url} cloned successfully into {destination_path} on branch '{branch}'.")
 
